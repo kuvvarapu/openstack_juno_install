@@ -1,0 +1,33 @@
+#!/bin/bash
+#This script is used for keystone installation and basic configuration
+#Author : kiku
+#Dependencies:
+# 	edit /etc/hosts file and place <replace with ur ip> <controller>
+#	
+# Total Changes "3"
+#database configuration
+
+mysql -u root -ptoor << EODs
+CREATE DATABASE keystone;
+GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' \
+  IDENTIFIED BY 'keystone';
+GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' \
+  IDENTIFIED BY 'keystone';
+EODs
+
+# keystone Installation
+	apt-get install keystone python-keystoneclient
+
+# Backup config file
+	cp /etc/keystone/keystone.conf /etc/keystone/keystone.conf.old
+#Enable Token
+	sed 's/#admin_token/admin_token #kiku/g' /etc/keystone/keystone.conf > /etc/keystone/keystone.conf
+
+#Change Database Path
+	sed 's/connection=sqlite:\/\/\/\/var\/lib\/keystone\/keystone.db/connection=mysql:\/\/keystone:keystone@controller\/keystone #kiku/g' /etc/keystone/keystone.conf>/etc/keystone/keystone.conf
+
+#Enable log Verbose
+	sed 's/#verbose=false/verbose=true #kiku/g' /etc/keystone/keystone.conf> /etc/keystone/keystone.conf
+
+#Sync keystone database
+	keystone-manage db_sync
