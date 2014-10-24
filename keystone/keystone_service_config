@@ -1,0 +1,33 @@
+#!/bin/bash
+# This script is used for to create admin & demo & service Tenant & keystone Endpoints
+export OS_SERVICE_TOKEN=ADMIN
+export OS_SERVICE_ENDPOINT=http://controller:35357/v2.0
+
+#create the admin tenant
+	keystone tenant-create --name admin --description "Admin Tenant"
+#creaet admin user
+	keystone user-create --name admin --pass admin --email keystone@example.com
+#create admin role
+	keystone role-create --name admin
+#Add the admin tenant and user to the admin role
+	keystone user-role-add --tenant admin --user admin --role admin
+#create the _member_role
+	keystone role-create --name _member_
+	keystone user-role-add --tenant admin --user admin --role _member_
+#create demo tenant
+	keystone tenant-create --name demo --description "Demo Tenant"
+	keystone user-create --name demo --pass demo --email demo@example
+	keystone user-role-add --tenant demo --user demo --role _member_
+	keystone tenant-create --name service --description "Service Tenant"
+
+#service entity and endpoint
+	keystone service-create --name keystone --type identity --description "Openstack Identity"
+	keystone endpoint-create \
+  --service-id $(keystone service-list | awk '/ identity / {print $2}') \
+  --publicurl http://controller:5000/v2.0 \
+  --internalurl http://controller:5000/v2.0 \
+  --adminurl http://controller:35357/v2.0 \
+  --region regionOne
+ 
+unset OS_SERVICE_TOKEN
+unset OS_SERVICE_ENDPOINT

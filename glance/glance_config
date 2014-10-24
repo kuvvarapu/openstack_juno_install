@@ -1,0 +1,74 @@
+#!/bin/bash
+#This script file is used to configure glance 
+#Configuration file are /etc/glance/glance-api.conf & glance-registry.conf
+#Author kiku
+#Date:- 24/10/2014
+########## glance-api.conf ####################
+#Include mysql support
+	sed -i '/sqlite_db/ i connection=mysql:\/\/glance:glance@controller\/glance' /etc/glance/glance-api.conf
+
+#Remove sqllitedb
+	sed -i 's/sqlite_db/#sqlite_db/' /etc/glance/glance-api.conf
+
+#configure keystone_authtoken (disable default settings)
+	sed -i 's/identity_uri/#identity_uri/' /etc/glance/glance-api.conf
+	sed -i 's/admin_tenant_name/#admin_tenant_name/' /etc/glance/glance-api.conf
+	sed -i 's/admin_user/#admin_user/' /etc/glance/glance-api.conf
+	sed -i 's/admin_password/#admin_password/' /etc/glance/glance-api.conf
+	sed -i 's/admin_password/#admin_password/' /etc/glance/glance-api.conf
+	
+# Keystone_authtoken New settings
+sed -i '/identity_uri/ i auth_uri = http://controller:5000/v2.0 \
+identity_uri = http://controller:35357 \
+admin_tenant_name = service \
+admin_user = glance \
+admin_password = glance' /etc/glance/glance-api.conf
+
+#flavor settings
+	sed -i 's/#flavor=/flavor=keystone/' /etc/glance/glance-api.conf
+	sed -i '/#verbose/ i verbose=True' /etc/glance/glance-api.conf
+############### glance-registry.conf #####################
+
+#Include mysql support
+sed -i '/sqlite_db/ i connection=mysql:\/\/glance:glance@controller\/glance' /etc/glance/glance-registry.conf
+
+#Remove sqlitedb
+        sed -i 's/sqlite_db/#sqlite_db/' /etc/glance/glance-registry.conf
+
+#configure keystone_authtoken (disable default settings)
+        sed -i 's/identity_uri/#identity_uri/' /etc/glance/glance-registry.conf
+        sed -i 's/admin_tenant_name/#admin_tenant_name/' /etc/glance/glance-registry.conf
+        sed -i 's/admin_user/#admin_user/' /etc/glance/glance-registry.conf
+        sed -i 's/admin_password/#admin_password/' /etc/glance/glance-registry.conf
+        sed -i 's/admin_password/#admin_password/' /etc/glance/glance-registry.conf
+
+# Keystone_authtoken New settings
+sed -i '/identity_uri/ i auth_uri = http://controller:5000/v2.0 \
+identity_uri = http://controller:35357 \
+admin_tenant_name = service \
+admin_user = glance \
+admin_password = glance' /etc/glance/glance-registry.conf
+#flavor settings
+        sed -i 's/#flavor=/flavor=keystone/' /etc/glance/glance-registry.conf
+        sed -i '/#verbose/ i verbose=True' /etc/glance/glance-registry.conf
+#sync with database
+	glance-manage db_sync
+#Restart Service
+	service glance-registry restart
+	 service glance-api restart
+#Remove sqlite db for glance
+	rm -f /var/lib/glance/glance.sqlite
+
+#checking Glance
+	glance image-list
+#Downloading Images
+	mkdir /tmp/images
+	cd /tmp/images
+	wget http://cdn.download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img
+#upload image into glance
+	glance image-create --name "cirros-0.3.3-x86_64" --file cirros-0.3.3-x86_64-disk.img \
+  --disk-format qcow2 --container-format bare --is-public True --progress
+#Checking glance db
+	glance image-list
+#Remove downloaded files in temp
+	rm -rf /tmp/images

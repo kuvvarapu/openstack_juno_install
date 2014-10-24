@@ -31,3 +31,5 @@ EODs
 
 #Sync keystone database
 	keystone-manage db_sync
+#Remove Old sqllite db
+rm -f /var/lib/keystone/keystone.db

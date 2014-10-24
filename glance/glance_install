@@ -1,0 +1,34 @@
+#!/bin/bash
+#This script is used to install and configure glance
+
+#create glance database
+mysql -u root -ptoor << EODs
+CREATE DATABASE glance;
+GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'localhost' \
+ IDENTIFIED BY 'glance';
+GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'%' \
+ IDENTIFIED BY 'glance';
+EODs
+
+#Provide admin environment
+source ../admin-openrc
+
+#create glance user 
+	 keystone user-create --name glance --pass glance
+#Link the glance user to the service tenant and admin role
+	keystone user-role-add --user glance --tenant service --role admin
+#create glance service
+	 keystone service-create --name glance --type image \
+  --description "OpenStack Image Service"
+
+#create the Identity service endpoints
+keystone endpoint-create \
+  --service-id $(keystone service-list | awk '/ image / {print $2}') \
+  --publicurl http://controller:9292 \
+  --internalurl http://controller:9292 \
+  --adminurl http://controller:9292 \
+  --region regionOne
+# Install the glance packages
+apt-get install glance python-glanceclient
+
+
