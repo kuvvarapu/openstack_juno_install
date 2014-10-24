@@ -1,0 +1,45 @@
+#!/bin/bash
+#This script is used to setup prerequisites for openstack installation
+#Author: kkk
+
+
+# To setup ip in hosts file
+#	sed '/localhost/ i <place your ip> controller' /etc/hosts >/etc/hosts
+	sed -i '/localhost/ i 192.168.1.5 controller' /etc/hosts 
+# update the package repository
+	apt-get update
+#Install and configure NTP server
+	apt-get install ntp -y
+	service ntp restart
+	cp /etc/ntp.conf /etc/ntp.conf.bkp
+	sed -i 's/server/#server/g' /etc/ntp.conf
+	echo "server controller.local" >> /etc/ntp.conf
+	service ntp start
+#install mysql Packages
+	apt-get install mariadb-server python-mysqldb -y
+	cp /etc/mysql/my.cnf> /etc/mysql/my.cnf.bkp
+	sed -i 's/127.0.0.1/0.0.0.0/' /etc/mysql/my.cnf 
+# change storage engine to innodb
+	sed -i '/tmpdir/ i default-storage-engine = innodb \
+                innodb_file_per_table \
+                collation-server = utf8_general_ci\
+                init-connect = "'"SET NAMES utf8"'" \
+		 character-set-server = utf8 ' /etc/mysql/my.cnf 
+#Restart Server
+	service mysql restart
+#mysql secure installation ( Manually select the options)
+	sleep 20
+	echo "manually  select the options"
+	/usr/bin/mysql_secure_installation
+#install python-software-properties 
+	apt-get install python-software-properties -y
+#To enable the openstack repository
+	#touch  /etc/apt/sources.list.d/ubuntu-cloud-archive-juno-trusty.list
+	echo "deb http://ubuntu-cloud.archive.canonical.com/ubuntu trusty-updates/juno main" > /etc/apt/sources.list.d/ubuntu-cloud-archive-juno-trusty.list
+#Ubuntu Cloud archive repository keyring
+	apt-get install ubuntu-cloud-keyring 
+	apt-get update && apt-get dist-upgrade
+
+#Install rabbitmq server
+	apt-get install rabbitmq-server -y
+

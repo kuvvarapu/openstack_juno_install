@@ -16,18 +16,18 @@ GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' \
 EODs
 
 # keystone Installation
-	apt-get install keystone python-keystoneclient
+	apt-get install keystone python-keystoneclient -y
 
 # Backup config file
 	cp /etc/keystone/keystone.conf /etc/keystone/keystone.conf.old
 #Enable Token
-	sed 's/#admin_token/admin_token #kiku/g' /etc/keystone/keystone.conf > /etc/keystone/keystone.conf
+	sed -i 's/#admin_token/admin_token #kiku/g' /etc/keystone/keystone.conf 
 
 #Change Database Path
-	sed 's/connection=sqlite:\/\/\/\/var\/lib\/keystone\/keystone.db/connection=mysql:\/\/keystone:keystone@controller\/keystone #kiku/g' /etc/keystone/keystone.conf>/etc/keystone/keystone.conf
+	sed -i 's/connection=sqlite:\/\/\/\/var\/lib\/keystone\/keystone.db/connection=mysql:\/\/keystone:keystone@controller\/keystone #kiku/g' /etc/keystone/keystone.conf
 
 #Enable log Verbose
-	sed 's/#verbose=false/verbose=true #kiku/g' /etc/keystone/keystone.conf> /etc/keystone/keystone.conf
+	sed -i 's/#verbose=false/verbose=true #kiku/g' /etc/keystone/keystone.conf
 
 #Sync keystone database
 	keystone-manage db_sync
