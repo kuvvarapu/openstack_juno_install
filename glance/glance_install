@@ -29,6 +29,6 @@ keystone endpoint-create \
   --adminurl http://controller:9292 \
   --region regionOne
 # Install the glance packages
-apt-get install glance python-glanceclient
+apt-get install glance python-glanceclient -y
 
 

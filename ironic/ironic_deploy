@@ -1,0 +1,36 @@
+#!/bin/bash
+#This script is used to deploy and configure IRONIC service
+#Author: kiku
+#Date:- 30/10/2014
+
+#creaet user and add it to service
+keystone user-create --name=ironic --pass=ironic --email=ironic@example.com
+
+keystone user-role-add --user=ironic --tenant=service --role=admin
+
+#Register baremetal service with identity
+keystone service-create --name=ironic --type=baremetal \
+--description="Ironic bare metal provisioning service"
+
+#create Endpoint  
+keystone endpoint-create \
+--service-id=the_service_id_above \
+--publicurl=http://IRONIC_NODE:6385 \
+--internalurl=http://IRONIC_NODE:6385 \
+--adminurl=http://IRONIC_NODE:6385
+
+#create mysql database
+mysql -u root -ptoor << EODs
+CREATE DATABASE ironic;
+GRANT ALL PRIVILEGES ON ironic.* TO 'ironic'@'localhost' \
+  IDENTIFIED BY 'ironic';
+GRANT ALL PRIVILEGES ON ironic.* TO 'ironic'@'%' \
+  IDENTIFIED BY 'ironic';
+EODs
+
+#Install IRONIC Packages
+apt-get install ironic-api ironic-conductor python-ironicclient
+
+
+#database settings 
+#connection = mysql://ironic:IRONIC_DBPASSWORD@DB_IP/ironic?charset=utf8

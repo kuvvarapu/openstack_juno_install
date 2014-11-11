@@ -38,8 +38,8 @@
 	echo "deb http://ubuntu-cloud.archive.canonical.com/ubuntu trusty-updates/juno main" > /etc/apt/sources.list.d/ubuntu-cloud-archive-juno-trusty.list
 #Ubuntu Cloud archive repository keyring
 	apt-get install ubuntu-cloud-keyring 
-	apt-get update && apt-get dist-upgrade
-
+	#apt-get update && apt-get dist-upgrade
+	apt-get update
 #Install rabbitmq server
 	apt-get install rabbitmq-server -y
 

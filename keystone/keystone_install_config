@@ -21,15 +21,16 @@ EODs
 # Backup config file
 	cp /etc/keystone/keystone.conf /etc/keystone/keystone.conf.old
 #Enable Token
-	sed -i 's/#admin_token/admin_token #kiku/g' /etc/keystone/keystone.conf 
+	sed -i 's/#admin_token/admin_token /g' /etc/keystone/keystone.conf 
 
 #Change Database Path
-	sed -i 's/connection=sqlite:\/\/\/\/var\/lib\/keystone\/keystone.db/connection=mysql:\/\/keystone:keystone@controller\/keystone #kiku/g' /etc/keystone/keystone.conf
+	sed -i 's/connection=sqlite:\/\/\/\/var\/lib\/keystone\/keystone.db/connection=mysql:\/\/keystone:keystone@controller\/keystone /g' /etc/keystone/keystone.conf
 
 #Enable log Verbose
-	sed -i 's/#verbose=false/verbose=true #kiku/g' /etc/keystone/keystone.conf
+	sed -i 's/#verbose=false/verbose=true /g' /etc/keystone/keystone.conf
 
 #Sync keystone database
 	keystone-manage db_sync
 #Remove Old sqllite db
 rm -f /var/lib/keystone/keystone.db
+service keystone restart

@@ -1,0 +1,29 @@
+#!/bin/bash
+#This script is used to install & configure compute node
+
+#database configuration
+mysql -u root -ptoor << EODs
+CREATE DATABASE ;
+GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' \
+  IDENTIFIED BY 'keystone';
+GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' \
+  IDENTIFIED BY 'keystone';
+EODs
+
+
+keystone user-create --name nova --pass nova
+
+keystone user-role-add --user nova --tenant service --role admin
+
+keystone service-create --name nova --type compute \
+  --description "OpenStack Compute"
+
+keystone endpoint-create \
+  --service-id $(keystone service-list | awk '/ compute / {print $2}') \
+  --publicurl http://controller:8774/v2/%\(tenant_id\)s \
+  --internalurl http://controller:8774/v2/%\(tenant_id\)s \
+  --adminurl http://controller:8774/v2/%\(tenant_id\)s \
+  --region regionOne
+
+apt-get install nova-api nova-cert nova-conductor nova-consoleauth \
+  nova-novncproxy nova-scheduler python-novaclient

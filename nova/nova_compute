@@ -1,0 +1,17 @@
+#!/bin/bash
+#This script is used to install & configure novacompute node
+#Author: kiku
+#Date:- 30/10/2014
+
+#Install the nova compute packages
+apt-get install nova-compute sysfsutil
+
+#libvirt configuration
+#sed -i 's/virt_type/#virt_type/g' /etc/nova/nova-compute.conf
+sed -i 's/kvm/qemu/g' /etc/nova/nova-compute.conf
+service nova-compute restart
+
+rm -f /var/lib/nova/nova.sqlite
+
+nova service-list
+

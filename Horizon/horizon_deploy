@@ -1,0 +1,17 @@
+#!/bin/bash
+#This scritp is used to deploy Horizon dashboard
+#Author: kkk
+#Date:- 30/10/2014
+
+#Install the dashboard
+apt-get install apache2 memcached libapache2-mod-wsgi openstack-dashboard -y
+
+#Remove Ubuntu theme package
+apt-get remove --purge openstack-dashboard-ubuntu-theme -y
+
+#Openstack host setup
+sed -i 's/127.0.0.1/controller/g' /etc/openstack-dashboard/local_settings.py
+service apache2 restart
+service memcached restart
+
+
