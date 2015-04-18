@@ -31,8 +31,7 @@ sed -i '/DEFAULT/a \
 interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver \
 dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq \
 use_namespaces = True \
-dnsmasq_config_file = /etc/neutron/dnsmasq-neutron.conf \
-' /etc/neutron/dhcp_agent.ini
+dnsmasq_config_file = /etc/neutron/dnsmasq-neutron.conf ' /etc/neutron/dhcp_agent.ini
 #Create and edit the /etc/neutron/dnsmasq-neutron.conf file
 touch /etc/neutron/dnsmasq-neutron.conf
 echo "dhcp-option-force=26,1454" > /etc/neutron/dnsmasq-neutron.conf
@@ -52,26 +51,38 @@ verbose = True \
 
 #Metadata secret 
 sed -i '/security_group_api/a \
-service_neutron_metadata_proxy = true
-neutron_metadata_proxy_shared_secret = novaneutron \
-' /etc/nova/nova.conf
+service_neutron_metadata_proxy = true \
+neutron_metadata_proxy_shared_secret = novaneutron ' /etc/nova/nova.conf
 service nova-api restart
 
 #configure ML2 Plugin
 sed -i '/#enable_ipset/a \
 \[ovs\] \
-#local_ip = INSTANCE_TUNNELS_INTERFACE_IP_ADDRESS \
+local_ip = 127.0.0.1 \
 tunnel_type = gre \
-enable_tunneling = True \
-' /etc/neutron/plugins/ml2/ml2_conf.ini
+enable_tunneling = True ' /etc/neutron/plugins/ml2/ml2_conf.ini
 
 #Configure OpenvSwitch(OVS) service
 service openvswitch-switch restart
 ovs-vsctl add-br br-int
 ovs-vsctl add-br br-ex
 ovs-vsctl add-port br-ex eth0
-ifconfig eth0 0
 dhclient br-ex
+ifconfig eth0 0
+
+#edit the network interface file according to OVS
+#sed -i '/auto eth0/a \
+#face eth0 inet manual\
+#up ip link set dev $IFACE up \
+#down ip link set dev $IFACE down \
+#br-ex
+#auto br-ex \
+#iface br-ex inet dhcp \
+#' /etc/network/interfaces
+
+
+
+
 
 # Restart the Networking services
 service neutron-plugin-openvswitch-agent restart

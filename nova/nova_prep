@@ -49,13 +49,21 @@ rabbit_password = guest \
 my_ip = 127.0.0.1 \
 vncserver_listen = 127.0.0.1 \
 verbose = true \
-vncserver_proxyclient_address = 127.0.0.1 ' /etc/nova/nova.conf
+vncserver_proxyclient_address = 127.0.0.1 \
+#Neutron for nova \
+ec2_private_dns_show_ip=True \
+api_paste_config=\/etc\/nova\/api-paste.ini \
+enabled_apis=ec2,osapi_compute,metadata \
+network_api_class = nova.network.neutronv2.api.API \
+security_group_api = neutron \
+linuxnet_interface_driver = nova.network.linux_net.LinuxOVSInterfaceDriver\
+firewall_driver = nova.virt.firewall.NoopFirewallDriver' /etc/nova/nova.conf
 
 #keystone_authtoken
 sed -i '/connection/ a \
 \[keystone_authtoken\] \
-auth_uri = http://controller:5000/v2.0 \
-#identity_uri = http://controller:35357 \
+auth_uri = http:\/\/controller:5000\/v2.0 \
+#identity_uri = http:\/\/controller:35357 \
 auth_host = controller \
 auth_port = 35357 \
 auth_protocol = http \
@@ -66,7 +74,18 @@ admin_password = nova ' /etc/nova/nova.conf
 #Glance 
 sed -i '/connection=/ a \ 
 \[glance\] \
-"host = controller" ' /etc/nova/nova.conf
+host = controller' /etc/nova/nova.conf
+
+sed -i '/admin_password =/ a \
+\[neutron\] \
+url=http:\/\/controller:9696 \
+auth_strategy=keystone \
+admin_auth_url=http:\/\/controller:35357\/v2.0 \
+admin_tenant_name=service \
+admin_username=neutron \
+admin_password=neutron \
+service_metadata_proxy=True \
+metadata_proxy_shared_secret = METADATA_SECRET' /etc/nova/nova.conf
 
 #remove sqlitedb
 rm -f /var/lib/nova/nova.sqlite

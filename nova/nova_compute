@@ -4,7 +4,7 @@
 #Date:- 30/10/2014
 
 #Install the nova compute packages
-apt-get install nova-compute sysfsutil
+apt-get install nova-compute sysfsutils
 
 #libvirt configuration
 #sed -i 's/virt_type/#virt_type/g' /etc/nova/nova-compute.conf
